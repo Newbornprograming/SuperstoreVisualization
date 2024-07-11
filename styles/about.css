@@ -1,0 +1,439 @@
+
+*{
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  outline: none;
+  border: none;
+  text-decoration: none;
+}
+
+*, ::after, ::before{
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Roboto', sans-serif;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-height: 100vh;
+  box-sizing: border-box;
+  scroll-behavior: smooth;
+}
+
+/* Pastikan konten utama memenuhi ruang yang tersedia */
+main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 90px;
+}
+
+.row {
+  --bs-gutter-x: 1.5rem;
+  --bs-gutter-y: 0;
+  display: flex;
+  flex-wrap: wrap;
+  margin-top: calc(-1* var(--bs-gutter-y));
+  margin-right: calc(-.5* var(--bs-gutter-x));
+  margin-left: calc(-.5* var(--bs-gutter-x));
+}
+
+div {
+  display: block;
+  unicode-bidi: isolate;
+}
+
+.col-12 {
+  flex: 0 0 auto;
+  width: 100%;
+}
+
+.row>* {
+  flex-shrink: 0;
+  width: 100%;
+  max-width: 100%;
+  padding-right: calc(var(--bs-gutter-x)* .5);
+  padding-left: calc(var(--bs-gutter-x)* .5);
+  margin-top: var(--bs-gutter-y);
+}
+
+.container {
+  --bs-gutter-x: 1.5rem;
+  --bs-gutter-y: 0;
+  width: 100%;
+  padding-right: calc(var(--bs-gutter-x)* .5);
+  padding-left: calc(var(--bs-gutter-x)* .5);
+  margin-right: auto;
+  margin-left: auto;
+}
+
+.text-center {
+  text-align: center !important;
+}
+
+.text-secondary {
+  --bs-text-opacity: 1;
+  color: rgba(108, 117, 125, 1) !important;
+}
+
+.py-3 {
+  padding-top: 1rem !important;
+  padding-bottom: 1rem !important;
+}
+
+.mb-4 {
+  margin-bottom: 1.5rem !important;
+}
+
+.mb-5 {
+  margin-bottom: 3rem !important;
+}
+
+.display-5 {
+  font-size: calc(1.425rem + 2.1vw);
+  font-weight: 300;
+  line-height: 1.2;
+}
+
+.fs-4 {
+  font-size: calc(1.275rem + .3vw) !important;
+}
+
+.lead {
+  font-size: 1.25rem;
+  font-weight: 300;
+}
+
+.h2 {
+  font-size: calc(1.325rem + .9vw);
+  margin-top: 0;
+  margin-bottom: .5rem;
+  font-weight: 500;
+  line-height: 1.2;
+  color: gray;
+}
+
+p {
+  margin-top: 0;
+  margin-bottom: 1rem;
+  display: block;
+  margin-block-start: 1em;
+  margin-block-end: 1em;
+  margin-inline-start: 0px;
+  margin-inline-end: 0px;
+  unicode-bidi: isolate;
+}
+
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.4 rem 7%;
+  background-color: #001164;
+  border-bottom: 1px #ffffff;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 9999;
+}
+
+.navbar .navbar-logo {
+  font-size: 24px;
+  font-weight: 700;
+  display: flex; /* Menggunakan flexbox untuk menyusun elemen anak secara horizontal */
+  align-items: center; /* Menyelaraskan elemen anak secara vertikal di tengah */
+  color: white;
+  padding: 10px;
+}
+
+.navbar-nav {
+  display: flex;
+  gap: 15px;
+  margin-left: auto;
+}
+
+.navbar .navbar-nav a {
+  color: white;
+  display: inline-block;
+  font-size: 18px;
+  margin: 0 1rem;
+}
+
+.navbar .navbar-nav a:hover {
+  color: rgb(225, 229, 0);
+}
+
+.navbar .navbar-nav a::after {
+  content: '';
+  display: block;
+  padding-bottom: 0.5rem;
+  border-bottom: 0.1rem solid white;
+  transform: scaleX(0);
+  transition: 0.2s linear;
+}
+
+.navbar .navbar-nav a:hover::after {
+  transform: scaleX(0.5);
+}
+
+.navbar .navbar-extra a {
+  color: #fff;
+  margin: 0 0.5rem;
+}
+
+.navbar .navbar-extra a:hover {
+  color: white;
+}
+
+#hamburger-menu {
+  display: none;
+}
+
+/* Responsive Styles */
+@media (max-width: 1366px) {
+  html {
+    font-size: 75%;
+  }
+}
+
+/* Tablet */
+@media (max-width: 758px) {
+    html {
+      font-size: 62.5%;
+    }
+
+    #hamburger-menu {
+      display: inline-block;
+    }
+
+    .navbar .navbar-nav {
+      position: absolute;
+      flex-direction: column;
+      gap: 0;
+      top: 100%;
+      right: -100%;
+      background-color: #001164;
+      width: 30rem;
+      height: 100vh;
+      transition: 0.3s;
+    }
+
+    .navbar .navbar-nav.active {
+      right: 0;
+    }
+
+    .navbar .navbar-nav a {
+      color: white;
+      display: block;
+      margin: 1.5rem;
+      padding: 0.5rem;
+      font-size: 2rem;
+    }
+
+  .navbar .navbar-nav a::after {
+    transform-origin: 0 0;
+  }
+
+  .navbar .navbar-nav a:hover::after {
+    transform: scaleX(0.2);
+  }
+
+
+  .about .row {
+    flex-wrap: wrap;
+  }
+
+  .about .row .about-img img {
+    height: 24rem;
+    object-fit: cover;
+    object-position: center;
+  }
+
+  .about .row .content {
+    padding: 0;
+  }
+
+  .about .row .content h3 {
+    margin-top: 1rem;
+    font-size: 2rem;
+  }
+
+  .about .row .content p {
+    font-size: 1.6rem;
+  }
+
+  .menu p {
+    font-size: 1.2rem;
+  }
+
+  .contact .row {
+    flex-wrap: wrap;
+  }
+
+  .contact .row .map {
+    height: 30rem;
+  }
+
+  .contact .row form {
+    padding-top: 0;
+  }
+
+  .modal-content {
+    flex-wrap: wrap;
+  }
+}
+
+/* Mobile Phone */
+@media (max-width: 450px) {
+  html {
+    font-size: 55%;
+  }
+}
+
+@media (min-width: 768px) {
+  .justify-content-md-center {
+      justify-content: center !important;
+  }
+}
+
+@media (min-width: 768px) {
+  .py-md-5 {
+      padding-top: 3rem !important;
+      padding-bottom: 3rem !important;
+  }
+}
+
+@media (min-width: 768px) {
+  .col-md-10 {
+      flex: 0 0 auto;
+      width: 83.33333333%;
+  }
+}
+/* ---------------------------------- Bagian Main ------------------------------------- */
+
+/* Gaya untuk container tim */
+.team-container1,
+.team-container2 {
+  background-color: #ffffff;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 40px;
+  padding: 20px;
+  max-width: 1200px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Gaya untuk kartu tim */
+.team-card {
+  background-color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  text-align: center;
+  width: calc(25% - 60px);
+  transition: transform 0.2s ease, box-shadow 0.5s ease, background-color 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  position: relative;
+  z-index: 0;
+}
+
+.team-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 99%, #fad0c4 100%);
+  z-index: -1;
+  transition: opacity 0.3s ease;
+  opacity: 0;
+  border-radius: 10px;
+}
+
+.team-card:hover {
+  transform: translateY(-15px) scale(1.05);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
+  background-color: rgba(255, 255, 255, 0.9);
+}
+
+.team-card:hover::before {
+  opacity: 1;
+}
+
+.team-card img {
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+  border-bottom: 1px solid #ddd;
+  transition: transform 0.3s ease;
+}
+
+.team-card:hover img {
+  transform: scale(1.1);
+}
+
+.team-card h3 {
+  margin: 15px 0 5px;
+  font-size: 20px;
+  color: #333;
+  transition: color 0.3s ease;
+}
+
+.team-card p {
+  margin: 0 0 15px;
+  font-size: 16px;
+  color: #777;
+  transition: color 0.3s ease;
+}
+
+.team-card:hover h3, .team-card:hover p {
+  color: #000;
+}
+
+/* Media queries untuk tampilan responsif */
+@media (max-width: 768px) {
+  .team-card {
+      width: calc(50% - 20px);
+  }
+}
+
+@media (max-width: 480px) {
+  .team-card {
+      width: 100%;
+  }
+}
+
+/* Gaya untuk footer */
+.footer {
+  width: 100%;
+  padding: 20px;
+  background-color: black;
+  color: white;
+  text-align: center;
+  box-sizing: border-box;
+  margin-top: auto; /* Pastikan footer berada di dasar halaman */
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+  .footer {
+      padding: 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  .footer {
+      padding: 10px;
+  }
+}

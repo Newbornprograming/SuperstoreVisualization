@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+body {font-family: Arial;}
+
+/* Style the tab */
+.tab {
+  overflow: hidden;
+  border: 1px solid #ccc;
+  background-color: #f1f1f1;
+}
+
+/* Style the buttons inside the tab */
+.tab button {
+  background-color: inherit;
+  float: left;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  padding: 14px 16px;
+  transition: 0.3s;
+  font-size: 17px;
+}
+
+/* Change background color of buttons on hover */
+.tab button:hover {
+  background-color: #ddd;
+}
+
+/* Create an active/current tablink class */
+.tab button.active {
+  background-color: #ccc;
+}
+
+/* Style the tab content */
+.tabcontent {
+  display: none;
+  padding: 6px 12px;
+  border: 1px solid #ccc;
+  border-top: none;
+}
+</style>
+</head>
+<body>
+
+<div class="tab">
+  <button id="defaultOpen" class="tablinks" onclick="openSubMenu(event, 'Overview')">Overview</button>
+  <button class="tablinks" onclick="openSubMenu(event, 'Segment')">Segment</button>
+  <button class="tablinks" onclick="openSubMenu(event, 'Region')">Region</button>
+  <button class="tablinks" onclick="openSubMenu(event, 'Product')">Product</button>
+</div>
+
+<div id="Overview" class="tabcontent">
+    <section class="wrapper-visualization">
+        <div class="card">
+            <h2 class="title-visualization">Sales by Segment</h2>
+            <canvas id="salesBySegment"></canvas>
+        </div>
+
+        <div class="card">
+            <h2 class="title-visualization">Sales by Category</h2>
+            <canvas id="salesByCategory"></canvas>
+        </div>
+    </section>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0/dist/chartjs-plugin-datalabels.min.js"></script>
+    <script>
+        // Sales by Segment
+
+        document.addEventListener('DOMContentLoaded', function() {
+const ctx = document.getElementById('salesBySegment').getContext('2d');
+
+fetch('/json/dataset.json')
+    .then((response) => response.json())
+    .then((data) => {
+        const customers = data.data; // Asumsikan data berada di dalam objek "data"
+
+        // Filter dan kelompokkan data berdasarkan Segment
+        const salesBySegment = customers.reduce((acc, item) => {
+            if (acc[item.Segment]) {
+                acc[item.Segment] += item.Sales;
+            } else {
+                acc[item.Segment] = item.Sales;
+            }
+            return acc;
+        }, {});
+
+        // Membuat data untuk chart
+        const segments = Object.keys(salesBySegment);
+        const sales = Object.values(salesBySegment);
+
+        // Warna untuk setiap segmen
+        const colors = {
+            'Consumer': 'rgba(200, 10, 192, 0.2)',
+            'Corporate': 'rgba(255, 99, 132, 0.2)',
+            'Home Office': 'rgba(54, 162, 235, 0.2)'
+        };
+
+        const borderColors = {
+            'Consumer': 'rgba(200, 10, 192, 1)',
+            'Corporate': 'rgba(255, 99, 132, 1)',
+            'Home Office': 'rgba(54, 162, 235, 1)'
+        };
+
+        const backgroundColors = segments.map(segment => colors[segment]);
+        const borderColorArray = segments.map(segment => borderColors[segment]);
+
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: segments,
+                datasets: [{
+                    label: 'Sales by Segment',
+                    data: sales,
+                    backgroundColor: backgroundColors,
+                    borderColor: borderColorArray,
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    })
+    .catch((error) => console.error('Error fetching JSON:', error));
+});
+
+// Sales by Category
+
+document.addEventListener('DOMContentLoaded', function() {
+const ctx = document.getElementById('salesByCategory').getContext('2d');
+
+fetch('/json/dataset.json')
+    .then((response) => response.json())
+    .then((data) => {
+        const salesByCategory = data.data.reduce((acc, item) => {
+            if (acc[item.Category]) {
+                acc[item.Category] += item.Sales;
+            } else {
+                acc[item.Category] = item.Sales;
+            }
+            return acc;
+        }, {});
+
+        const categories = Object.keys(salesByCategory);
+        const sales = Object.values(salesByCategory);
+
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: categories,
+                datasets: [{
+                    label: 'Sales by Category',
+                    data: sales,
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    })
+    .catch((error) => console.error('Error fetching JSON:', error));
+});
+    </script>
+
+<section class="wrapper-visualization">
+<div class="card">
+    <h2 class="title-visualization">AVG Day Service by Shipping</h2>
+    <canvas id="AVGDayServiceByShipping""></canvas>
+</div>
+
+<div class=" card">
+        <h2 class="title-visualization">Sales by Sub-Category</h2>
+        <canvas id="salesBySubCategory"></canvas>
+</div>
+</section>
+
+<script>
+// AVG Day Service by Shipping
+
+document.addEventListener('DOMContentLoaded', function() {
+const ctx = document.getElementById('AVGDayServiceByShipping').getContext('2d');
+
+fetch('/json/dataset.json')
+    .then((response) => response.json())
+    .then((data) => {
+        const customers = data.data;
+
+        // Menghitung average day service berdasarkan Ship Mode
+        const daysBySegment = customers.reduce((acc, item) => {
+            const orderDate = new Date(item['Order Date']);
+            const shipDate = new Date(item['Ship Date']);
+            const dayDifference = (shipDate - orderDate) / (1000 * 60 * 60 * 24);
+
+            if (acc[item['Ship Mode']]) {
+                acc[item['Ship Mode']].totalDays += dayDifference;
+                acc[item['Ship Mode']].count += 1;
+            } else {
+                acc[item['Ship Mode']] = { totalDays: dayDifference, count: 1 };
+            }
+            return acc;
+        }, {});
+
+        // Menghitung rata-rata days service untuk setiap Ship Mode
+        const shipModes = Object.keys(daysBySegment);
+        const averageDays = shipModes.map(mode => (daysBySegment[mode].totalDays / daysBySegment[mode].count).toFixed(2));
+
+        // Warna untuk setiap Ship Mode
+        const colors = [
+            'rgba(75, 192, 192, 0.2)',
+            'rgba(255, 99, 132, 0.2)',
+            'rgba(54, 162, 235, 0.2)',
+            'rgba(255, 206, 86, 0.2)',
+            'rgba(153, 102, 255, 0.2)',
+            'rgba(255, 159, 64, 0.2)'
+        ];
+
+        const borderColors = [
+            'rgba(75, 192, 192, 1)',
+            'rgba(255, 99, 132, 1)',
+            'rgba(54, 162, 235, 1)',
+            'rgba(255, 206, 86, 1)',
+            'rgba(153, 102, 255, 1)',
+            'rgba(255, 159, 64, 1)'
+        ];
+
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: shipModes,
+                datasets: [{
+                    label: 'Average Days of Service by Ship Mode',
+                    data: averageDays,
+                    backgroundColor: colors.slice(0, shipModes.length),
+                    borderColor: borderColors.slice(0, shipModes.length),
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    })
+    .catch((error) => console.error('Error fetching JSON:', error));
+});
+
+
+// Sales by Sub-Category
+
+document.addEventListener('DOMContentLoaded', function() {
+const ctx = document.getElementById('salesBySubCategory').getContext('2d');
+
+fetch('/json/dataset.json')
+    .then((response) => response.json())
+    .then((data) => {
+        const salesBySubCategory = data.data.reduce((acc, item) => {
+            if (acc[item['Sub-Category']]) {
+                acc[item['Sub-Category']] += item.Sales;
+            } else {
+                acc[item['Sub-Category']] = item.Sales;
+            }
+            return acc;
+        }, {});
+
+        const subCategories = Object.keys(salesBySubCategory);
+        const sales = Object.values(salesBySubCategory);
+
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: subCategories,
+                datasets: [{
+                    label: 'Sales by Sub-Category',
+                    data: sales,
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    })
+    .catch((error) => console.error('Error fetching JSON:', error));
+});
+</script>
+
+<section class="wrapper-visualization">
+<div class="card">
+    <h2 class="title-visualization">Sales by Region</h2>
+    <canvas id="salesByRegion"></canvas>
+</div>
+
+<div class="card">
+    <h2 class="title-visualization">Sales by Region Year of Year</h2>
+    <canvas id="salesByRegionYoY"></canvas>
+</div>
+</section>
+
+<script>
+//Sales by Region
+
+document.addEventListener('DOMContentLoaded', function() {
+const ctx = document.getElementById('salesByRegion').getContext('2d');
+
+fetch('/json/dataset.json')
+    .then((response) => response.json())
+    .then((data) => {
+        const customers = data.data; // Asumsikan data berada di dalam objek "data"
+
+        // Filter dan kelompokkan data berdasarkan Region
+        const salesByRegion = customers.reduce((acc, item) => {
+            if (acc[item.Region]) {
+                acc[item.Region] += item.Sales;
+            } else {
+                acc[item.Region] = item.Sales;
+            }
+            return acc;
+        }, {});
+
+        // Membuat data untuk chart
+        const regions = Object.keys(salesByRegion);
+        const sales = Object.values(salesByRegion);
+
+        // Warna untuk setiap region
+        const colors = [
+            'rgba(75, 192, 192, 0.2)',
+            'rgba(255, 99, 132, 0.2)',
+            'rgba(54, 162, 235, 0.2)',
+            'rgba(255, 206, 86, 0.2)'
+        ];
+
+        const borderColors = [
+            'rgba(75, 192, 192, 1)',
+            'rgba(255, 99, 132, 1)',
+            'rgba(54, 162, 235, 1)',
+            'rgba(255, 206, 86, 1)'
+        ];
+
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: regions,
+                datasets: [{
+                    label: 'Sales by Region',
+                    data: sales,
+                    backgroundColor: colors,
+                    borderColor: borderColors,
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    title: {
+                        display: true,
+                        text: 'Sales by Region'
+                    },
+                    datalabels: {
+                        formatter: (value, ctx) => {
+                            const total = ctx.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+                            const percentage = (value / total * 100).toFixed(2) + '%';
+                            return percentage;
+                        },
+                        color: 'black',
+                    }
+                }
+            },
+            plugins: [ChartDataLabels]
+        });
+    })
+    .catch((error) => console.error('Error fetching JSON:', error));
+});
+
+
+// Sales By Region Year of Year
+
+document.addEventListener('DOMContentLoaded', function() {
+const ctx = document.getElementById('salesByRegionYoY').getContext('2d');
+
+fetch('/json/dataset.json')
+    .then((response) => response.json())
+    .then((data) => {
+        const customers = data.data; // Asumsikan data berada di dalam objek "data"
+
+        // Filter dan kelompokkan data berdasarkan Region dan Year
+        const salesByRegionYear = customers.reduce((acc, item) => {
+            const year = new Date(item['Order Date']).getFullYear();
+            const key = `${item.Region}-${year}`;
+
+            if (acc[key]) {
+                acc[key] += item.Sales;
+            } else {
+                acc[key] = item.Sales;
+            }
+            return acc;
+        }, {});
+
+        // Membuat data untuk chart
+        const labels = [...new Set(Object.keys(salesByRegionYear).map(key => key.split('-')[1]))].sort(); // Mengambil tahun unik dan mengurutkannya
+        const regions = [...new Set(Object.keys(salesByRegionYear).map(key => key.split('-')[0]))]; // Mendapatkan list region unik
+        const datasets = regions.map((region, index) => {
+            const sales = labels.map(year => salesByRegionYear[`${region}-${year}`] || 0);
+            const colors = ['rgba(75, 192, 192, 0.2)', 'rgba(255, 99, 132, 0.2)', 'rgba(54, 162, 235, 0.2)', 'rgba(255, 206, 86, 0.2)'];
+            const borderColors = ['rgba(75, 192, 192, 1)', 'rgba(255, 99, 132, 1)', 'rgba(54, 162, 235, 1)', 'rgba(255, 206, 86, 1)'];
+
+            return {
+                label: `Sales in ${region}`,
+                data: sales,
+                backgroundColor: colors[index % colors.length],
+                borderColor: borderColors[index % borderColors.length],
+                borderWidth: 1
+            };
+        });
+
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: datasets
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    })
+    .catch((error) => console.error('Error fetching JSON:', error));
+});
+</script>
+
+<section class="wrapper-visualization">
+<div class="card">
+    <h2 class="title-visualization">Customer Ship Mode</h2>
+    <canvas id="customerShipMode"></canvas>
+</div>
+
+<div class="card">
+    <h2 class="title-visualization">Sales and Profit by Ship Mode</h2>
+    <canvas id="salesAndProfitByShipMode"></canvas>
+</div>
+</section>
+
+<script>
+// Customer Ship Mode
+
+document.addEventListener('DOMContentLoaded', function() {
+const ctx = document.getElementById('customerShipMode').getContext('2d');
+fetch('/json/dataset.json')
+    .then((response) => response.json())
+    .then((data) => {
+        const customers = data.data; // Asumsikan data berada di dalam objek "data"
+
+        // Filter data untuk hanya mengambil pelanggan dengan Ship Mode yang diinginkan
+        const filteredData = customers.filter(item =>
+            item['Ship Mode'] &&
+            (item['Ship Mode'] === 'Standard Class' ||
+                item['Ship Mode'] === 'Second Class' ||
+                item['Ship Mode'] === 'First Class' ||
+                item['Ship Mode'] === 'Same Day')
+        );
+
+        // Kelompokkan data berdasarkan Ship Mode
+        const salesByShipMode = filteredData.reduce((acc, item) => {
+            if (acc[item['Ship Mode']]) {
+                acc[item['Ship Mode']] += item.Sales;
+            } else {
+                acc[item['Ship Mode']] = item.Sales;
+            }
+            return acc;
+        }, {});
+
+        const shipModes = ['Standard Class', 'Second Class', 'First Class', 'Same Day'];
+        const sales = shipModes.map(mode => salesByShipMode[mode] || 0);
+
+        // Warna untuk setiap Ship Mode
+        const colors = ['rgba(75, 192, 192, 0.2)', 'rgba(255, 99, 132, 0.2)', 'rgba(54, 162, 235, 0.2)', 'rgba(255, 206, 86, 0.2)'];
+        const borderColors = ['rgba(75, 192, 192, 1)', 'rgba(255, 99, 132, 1)', 'rgba(54, 162, 235, 1)', 'rgba(255, 206, 86, 1)'];
+
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: shipModes,
+                datasets: [{
+                    label: 'Sales by Ship Mode',
+                    data: sales,
+                    backgroundColor: colors,
+                    borderColor: borderColors,
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    })
+    .catch((error) => console.error('Error fetching JSON:', error));
+});
+
+
+// Sales and Profit by Ship Mode
+
+document.addEventListener('DOMContentLoaded', function() {
+const ctx = document.getElementById('salesAndProfitByShipMode').getContext('2d');
+fetch('/json/dataset.json')
+    .then((response) => response.json())
+    .then((data) => {
+        const customers = data.data; // Asumsikan data berada di dalam objek "data"
+
+        // Filter data untuk hanya mengambil pelanggan dengan Ship Mode yang diinginkan
+        const filteredData = customers.filter(item =>
+            item['Ship Mode'] &&
+            (item['Ship Mode'] === 'Standard Class' ||
+                item['Ship Mode'] === 'Second Class' ||
+                item['Ship Mode'] === 'First Class' ||
+                item['Ship Mode'] === 'Same Day')
+        );
+
+        // Kelompokkan data berdasarkan Ship Mode
+        const salesAndProfitByShipMode = {
+            'Standard Class': { sales: 0, profit: 0 },
+            'Second Class': { sales: 0, profit: 0 },
+            'First Class': { sales: 0, profit: 0 },
+            'Same Day': { sales: 0, profit: 0 }
+        };
+
+        filteredData.forEach(item => {
+            const shipMode = item['Ship Mode'];
+            salesAndProfitByShipMode[shipMode].sales += item.Sales;
+            salesAndProfitByShipMode[shipMode].profit += item.Profit;
+        });
+
+        const shipModes = ['Standard Class', 'Second Class', 'First Class', 'Same Day'];
+        const salesData = shipModes.map(mode => salesAndProfitByShipMode[mode].sales);
+        const profitData = shipModes.map(mode => salesAndProfitByShipMode[mode].profit);
+
+        // Warna untuk sales dan profit
+        const colors = ['rgba(75, 192, 192, 0.2)', 'rgba(75, 192, 192, 1)'];
+        const borderColors = ['rgba(75, 192, 192, 1)', 'rgba(75, 192, 192, 1)'];
+
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: shipModes,
+                datasets: [{
+                    label: 'Sales',
+                    data: salesData,
+                    backgroundColor: colors[0],
+                    borderColor: borderColors[0],
+                    borderWidth: 1
+                },
+                {
+                    label: 'Profit',
+                    data: profitData,
+                    backgroundColor: colors[1],
+                    borderColor: borderColors[1],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    })
+    .catch((error) => console.error('Error fetching JSON:', error));
+});
+</script>
+
+</div>
+
+<div id="Segment" class="tabcontent">
+  <h3>Paris</h3>
+  <p>Paris is the capital of France.</p> 
+</div>
+
+<div id="Region" class="tabcontent">
+  <h3>Tokyo</h3>
+  <p>Tokyo is the capital of Japan.</p>
+</div>
+
+<div id="Product" class="tabcontent">
+    <h3>Tokyo</h3>
+    <p>Tokyo is the capital of Japan.</p>
+  </div>
+
+<script>
+function openSubMenu(evt, subMenuName) {
+  var i, tabcontent, tablinks;
+  tabcontent = document.getElementsByClassName("tabcontent");
+  for (i = 0; i < tabcontent.length; i++) {
+    tabcontent[i].style.display = "none";
+  }
+  tablinks = document.getElementsByClassName("tablinks");
+  for (i = 0; i < tablinks.length; i++) {
+    tablinks[i].className = tablinks[i].className.replace(" active", "");
+  }
+  document.getElementById(subMenuName).style.display = "block";
+  evt.currentTarget.className += " active";
+}
+
+document.getElementById("defaultOpen").click();
+</script>
+   
+</body>
+</html> 

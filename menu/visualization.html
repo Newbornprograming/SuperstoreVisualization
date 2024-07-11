@@ -1,0 +1,2058 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <title>Visualization</title>
+    <link href="../styles/visualization.css" rel="stylesheet" type="text/css" />
+    <script src="https://unpkg.com/feather-icons"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0/dist/chartjs-plugin-datalabels.min.js"></script>
+</head>
+
+
+<body>
+
+    <nav class="navbar">
+        <a href="#" class="navbar-logo">Superstore Analytics <img src="../image/logo.png" alt="" width="50" height="50"></a>
+  
+        <div class="navbar-nav">
+          <a href="/index.html">Home</a>
+          <a href="./dataset.html">Dataset</a>
+          <a href="./visualization.html">Visualization</a>
+          <a href="./about.html">About</a>
+        </div>
+  
+        <div class="navbar-extra">
+          <a href="#" id="hamburger-menu"><i data-feather="menu"></i></a>
+        </div>
+      </nav>
+
+    <main>
+        <section class="wrapper-menu-visualization">
+
+            <div class="tab">
+                <button id="defaultOpen" class="tablinks" onclick="openSubMenu(event, 'Overview')">Overview</button>
+                <button class="tablinks" onclick="openSubMenu(event, 'Segment')">Segment</button>
+                <button class="tablinks" onclick="openSubMenu(event, 'Region')">Region</button>
+                <button class="tablinks" onclick="openSubMenu(event, 'Product')">Product</button>
+            </div>
+        </section>
+
+        <div id="Overview" class="tabcontent">
+            
+            <section class="wrapper-visualization">
+                <div class="card">
+                    <h2 class="title-visualization">Sales by Segment</h2>
+                    <canvas id="salesBySegment"></canvas>
+                </div>
+    
+                <div class="card">
+                    <h2 class="title-visualization">Sales by Category</h2>
+                    <canvas id="salesByCategory"></canvas>
+                </div>
+            </section>
+    
+            <script>
+
+                // Sales by Segment
+    
+                document.addEventListener('DOMContentLoaded', function() {
+        const ctx = document.getElementById('salesBySegment').getContext('2d');
+    
+        fetch('/json/dataset.json')
+            .then((response) => response.json())
+            .then((data) => {
+                const customers = data.data; // Asumsikan data berada di dalam objek "data"
+    
+                // Filter dan kelompokkan data berdasarkan Segment
+                const salesBySegment = customers.reduce((acc, item) => {
+                    if (acc[item.Segment]) {
+                        acc[item.Segment] += item.Sales;
+                    } else {
+                        acc[item.Segment] = item.Sales;
+                    }
+                    return acc;
+                }, {});
+    
+                // Membuat data untuk chart
+                const segments = Object.keys(salesBySegment);
+                const sales = Object.values(salesBySegment);
+    
+                // Warna untuk setiap segmen
+                const colors = {
+                    'Consumer': 'rgba(200, 10, 192, 0.2)',
+                    'Corporate': 'rgba(255, 99, 132, 0.2)',
+                    'Home Office': 'rgba(54, 162, 235, 0.2)'
+                };
+    
+                const borderColors = {
+                    'Consumer': 'rgba(200, 10, 192, 1)',
+                    'Corporate': 'rgba(255, 99, 132, 1)',
+                    'Home Office': 'rgba(54, 162, 235, 1)'
+                };
+    
+                const backgroundColors = segments.map(segment => colors[segment]);
+                const borderColorArray = segments.map(segment => borderColors[segment]);
+    
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: segments,
+                        datasets: [{
+                            label: 'Sales by Segment',
+                            data: sales,
+                            backgroundColor: backgroundColors,
+                            borderColor: borderColorArray,
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            })
+            .catch((error) => console.error('Error fetching JSON:', error));
+    });
+    
+    // Sales by Category
+    
+    document.addEventListener('DOMContentLoaded', function() {
+        const ctx = document.getElementById('salesByCategory').getContext('2d');
+    
+        fetch('/json/dataset.json')
+            .then((response) => response.json())
+            .then((data) => {
+                const salesByCategory = data.data.reduce((acc, item) => {
+                    if (acc[item.Category]) {
+                        acc[item.Category] += item.Sales;
+                    } else {
+                        acc[item.Category] = item.Sales;
+                    }
+                    return acc;
+                }, {});
+    
+                const categories = Object.keys(salesByCategory);
+                const sales = Object.values(salesByCategory);
+    
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: categories,
+                        datasets: [{
+                            label: 'Sales by Category',
+                            data: sales,
+                            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                            borderColor: 'rgba(75, 192, 192, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            })
+            .catch((error) => console.error('Error fetching JSON:', error));
+    });
+            </script>
+    
+    <section class="wrapper-visualization">
+        <div class="card">
+            <h2 class="title-visualization">AVG Day Service by Shipping</h2>
+            <canvas id="AVGDayServiceByShipping""></canvas>
+        </div>
+    
+        <div class=" card">
+                <h2 class="title-visualization">Sales by Sub-Category</h2>
+                <canvas id="salesBySubCategory"></canvas>
+        </div>
+    </section>
+    
+    <script>
+        // AVG Day Service by Shipping
+    
+    document.addEventListener('DOMContentLoaded', function() {
+        const ctx = document.getElementById('AVGDayServiceByShipping').getContext('2d');
+    
+        fetch('/json/dataset.json')
+            .then((response) => response.json())
+            .then((data) => {
+                const customers = data.data;
+    
+                // Menghitung average day service berdasarkan Ship Mode
+                const daysBySegment = customers.reduce((acc, item) => {
+                    const orderDate = new Date(item['Order Date']);
+                    const shipDate = new Date(item['Ship Date']);
+                    const dayDifference = (shipDate - orderDate) / (1000 * 60 * 60 * 24);
+    
+                    if (acc[item['Ship Mode']]) {
+                        acc[item['Ship Mode']].totalDays += dayDifference;
+                        acc[item['Ship Mode']].count += 1;
+                    } else {
+                        acc[item['Ship Mode']] = { totalDays: dayDifference, count: 1 };
+                    }
+                    return acc;
+                }, {});
+    
+                // Menghitung rata-rata days service untuk setiap Ship Mode
+                const shipModes = Object.keys(daysBySegment);
+                const averageDays = shipModes.map(mode => (daysBySegment[mode].totalDays / daysBySegment[mode].count).toFixed(2));
+    
+                // Warna untuk setiap Ship Mode
+                const colors = [
+                    'rgba(75, 192, 192, 0.2)',
+                    'rgba(255, 99, 132, 0.2)',
+                    'rgba(54, 162, 235, 0.2)',
+                    'rgba(255, 206, 86, 0.2)',
+                    'rgba(153, 102, 255, 0.2)',
+                    'rgba(255, 159, 64, 0.2)'
+                ];
+    
+                const borderColors = [
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 206, 86, 1)',
+                    'rgba(153, 102, 255, 1)',
+                    'rgba(255, 159, 64, 1)'
+                ];
+    
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: shipModes,
+                        datasets: [{
+                            label: 'Average Days of Service by Ship Mode',
+                            data: averageDays,
+                            backgroundColor: colors.slice(0, shipModes.length),
+                            borderColor: borderColors.slice(0, shipModes.length),
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            })
+            .catch((error) => console.error('Error fetching JSON:', error));
+    });
+    
+    
+    // Sales by Sub-Category
+    
+    document.addEventListener('DOMContentLoaded', function() {
+        const ctx = document.getElementById('salesBySubCategory').getContext('2d');
+    
+        fetch('/json/dataset.json')
+            .then((response) => response.json())
+            .then((data) => {
+                const salesBySubCategory = data.data.reduce((acc, item) => {
+                    if (acc[item['Sub-Category']]) {
+                        acc[item['Sub-Category']] += item.Sales;
+                    } else {
+                        acc[item['Sub-Category']] = item.Sales;
+                    }
+                    return acc;
+                }, {});
+    
+                const subCategories = Object.keys(salesBySubCategory);
+                const sales = Object.values(salesBySubCategory);
+    
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: subCategories,
+                        datasets: [{
+                            label: 'Sales by Sub-Category',
+                            data: sales,
+                            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                            borderColor: 'rgba(75, 192, 192, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            })
+            .catch((error) => console.error('Error fetching JSON:', error));
+    });
+    </script>
+    
+    <section class="wrapper-visualization">
+        <div class="card">
+            <h2 class="title-visualization">Sales by Region</h2>
+            <canvas id="salesByRegion"></canvas>
+        </div>
+    
+        <div class="card">
+            <h2 class="title-visualization">Sales by Region Year of Year</h2>
+            <canvas id="salesByRegionYoY"></canvas>
+        </div>
+    </section>
+    
+    <script>
+
+        //Sales by Region
+    
+    document.addEventListener('DOMContentLoaded', function() {
+        const ctx = document.getElementById('salesByRegion').getContext('2d');
+    
+        fetch('/json/dataset.json')
+            .then((response) => response.json())
+            .then((data) => {
+                const customers = data.data; // Asumsikan data berada di dalam objek "data"
+    
+                // Filter dan kelompokkan data berdasarkan Region
+                const salesByRegion = customers.reduce((acc, item) => {
+                    if (acc[item.Region]) {
+                        acc[item.Region] += item.Sales;
+                    } else {
+                        acc[item.Region] = item.Sales;
+                    }
+                    return acc;
+                }, {});
+    
+                // Membuat data untuk chart
+                const regions = Object.keys(salesByRegion);
+                const sales = Object.values(salesByRegion);
+    
+                // Warna untuk setiap region
+                const colors = [
+                    'rgba(75, 192, 192, 0.2)',
+                    'rgba(255, 99, 132, 0.2)',
+                    'rgba(54, 162, 235, 0.2)',
+                    'rgba(255, 206, 86, 0.2)'
+                ];
+    
+                const borderColors = [
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 206, 86, 1)'
+                ];
+    
+                new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: regions,
+                        datasets: [{
+                            label: 'Sales by Region',
+                            data: sales,
+                            backgroundColor: colors,
+                            borderColor: borderColors,
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                            },
+                            title: {
+                                display: true,
+                                text: 'Sales by Region'
+                            },
+                            datalabels: {
+                                formatter: (value, ctx) => {
+                                    const total = ctx.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+                                    const percentage = (value / total * 100).toFixed(2) + '%';
+                                    return percentage;
+                                },
+                                color: 'black',
+                            }
+                        }
+                    },
+                    plugins: [ChartDataLabels]
+                });
+            })
+            .catch((error) => console.error('Error fetching JSON:', error));
+    });
+    
+    
+    // Sales By Region Year of Year
+    
+    document.addEventListener('DOMContentLoaded', function() {
+        const ctx = document.getElementById('salesByRegionYoY').getContext('2d');
+    
+        fetch('/json/dataset.json')
+            .then((response) => response.json())
+            .then((data) => {
+                const customers = data.data; // Asumsikan data berada di dalam objek "data"
+    
+                // Filter dan kelompokkan data berdasarkan Region dan Year
+                const salesByRegionYear = customers.reduce((acc, item) => {
+                    const year = new Date(item['Order Date']).getFullYear();
+                    const key = `${item.Region}-${year}`;
+    
+                    if (acc[key]) {
+                        acc[key] += item.Sales;
+                    } else {
+                        acc[key] = item.Sales;
+                    }
+                    return acc;
+                }, {});
+    
+                // Membuat data untuk chart
+                const labels = [...new Set(Object.keys(salesByRegionYear).map(key => key.split('-')[1]))].sort(); // Mengambil tahun unik dan mengurutkannya
+                const regions = [...new Set(Object.keys(salesByRegionYear).map(key => key.split('-')[0]))]; // Mendapatkan list region unik
+                const datasets = regions.map((region, index) => {
+                    const sales = labels.map(year => salesByRegionYear[`${region}-${year}`] || 0);
+                    const colors = ['rgba(75, 192, 192, 0.2)', 'rgba(255, 99, 132, 0.2)', 'rgba(54, 162, 235, 0.2)', 'rgba(255, 206, 86, 0.2)'];
+                    const borderColors = ['rgba(75, 192, 192, 1)', 'rgba(255, 99, 132, 1)', 'rgba(54, 162, 235, 1)', 'rgba(255, 206, 86, 1)'];
+    
+                    return {
+                        label: `Sales in ${region}`,
+                        data: sales,
+                        backgroundColor: colors[index % colors.length],
+                        borderColor: borderColors[index % borderColors.length],
+                        borderWidth: 1
+                    };
+                });
+    
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: datasets
+                    },
+                    options: {
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            })
+            .catch((error) => console.error('Error fetching JSON:', error));
+    });
+    </script>
+    
+    <section class="wrapper-visualization">
+        <div class="card">
+            <h2 class="title-visualization">Customer Ship Mode</h2>
+            <canvas id="customerShipMode"></canvas>
+        </div>
+    
+        <div class="card">
+            <h2 class="title-visualization">Sales and Profit by Ship Mode</h2>
+            <canvas id="salesAndProfitByShipMode"></canvas>
+        </div>
+    </section>
+    
+    <script>
+        // Customer Ship Mode
+    
+    document.addEventListener('DOMContentLoaded', function() {
+        const ctx = document.getElementById('customerShipMode').getContext('2d');
+        fetch('/json/dataset.json')
+            .then((response) => response.json())
+            .then((data) => {
+                const customers = data.data; // Asumsikan data berada di dalam objek "data"
+    
+                // Filter data untuk hanya mengambil pelanggan dengan Ship Mode yang diinginkan
+                const filteredData = customers.filter(item =>
+                    item['Ship Mode'] &&
+                    (item['Ship Mode'] === 'Standard Class' ||
+                        item['Ship Mode'] === 'Second Class' ||
+                        item['Ship Mode'] === 'First Class' ||
+                        item['Ship Mode'] === 'Same Day')
+                );
+    
+                // Kelompokkan data berdasarkan Ship Mode
+                const salesByShipMode = filteredData.reduce((acc, item) => {
+                    if (acc[item['Ship Mode']]) {
+                        acc[item['Ship Mode']] += item.Sales;
+                    } else {
+                        acc[item['Ship Mode']] = item.Sales;
+                    }
+                    return acc;
+                }, {});
+    
+                const shipModes = ['Standard Class', 'Second Class', 'First Class', 'Same Day'];
+                const sales = shipModes.map(mode => salesByShipMode[mode] || 0);
+    
+                // Warna untuk setiap Ship Mode
+                const colors = ['rgba(75, 192, 192, 0.2)', 'rgba(255, 99, 132, 0.2)', 'rgba(54, 162, 235, 0.2)', 'rgba(255, 206, 86, 0.2)'];
+                const borderColors = ['rgba(75, 192, 192, 1)', 'rgba(255, 99, 132, 1)', 'rgba(54, 162, 235, 1)', 'rgba(255, 206, 86, 1)'];
+    
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: shipModes,
+                        datasets: [{
+                            label: 'Sales by Ship Mode',
+                            data: sales,
+                            backgroundColor: colors,
+                            borderColor: borderColors,
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            })
+            .catch((error) => console.error('Error fetching JSON:', error));
+    });
+    
+    
+    // Sales and Profit by Ship Mode
+    
+    document.addEventListener('DOMContentLoaded', function() {
+        const ctx = document.getElementById('salesAndProfitByShipMode').getContext('2d');
+        fetch('/json/dataset.json')
+            .then((response) => response.json())
+            .then((data) => {
+                const customers = data.data; // Asumsikan data berada di dalam objek "data"
+    
+                // Filter data untuk hanya mengambil pelanggan dengan Ship Mode yang diinginkan
+                const filteredData = customers.filter(item =>
+                    item['Ship Mode'] &&
+                    (item['Ship Mode'] === 'Standard Class' ||
+                        item['Ship Mode'] === 'Second Class' ||
+                        item['Ship Mode'] === 'First Class' ||
+                        item['Ship Mode'] === 'Same Day')
+                );
+    
+                // Kelompokkan data berdasarkan Ship Mode
+                const salesAndProfitByShipMode = {
+                    'Standard Class': { sales: 0, profit: 0 },
+                    'Second Class': { sales: 0, profit: 0 },
+                    'First Class': { sales: 0, profit: 0 },
+                    'Same Day': { sales: 0, profit: 0 }
+                };
+    
+                filteredData.forEach(item => {
+                    const shipMode = item['Ship Mode'];
+                    salesAndProfitByShipMode[shipMode].sales += item.Sales;
+                    salesAndProfitByShipMode[shipMode].profit += item.Profit;
+                });
+    
+                const shipModes = ['Standard Class', 'Second Class', 'First Class', 'Same Day'];
+                const salesData = shipModes.map(mode => salesAndProfitByShipMode[mode].sales);
+                const profitData = shipModes.map(mode => salesAndProfitByShipMode[mode].profit);
+    
+                // Warna untuk sales dan profit
+                const colors = ['rgba(75, 192, 192, 0.2)', 'rgba(75, 192, 192, 1)'];
+                const borderColors = ['rgba(75, 192, 192, 1)', 'rgba(75, 192, 192, 1)'];
+    
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: shipModes,
+                        datasets: [{
+                            label: 'Sales',
+                            data: salesData,
+                            backgroundColor: colors[0],
+                            borderColor: borderColors[0],
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Profit',
+                            data: profitData,
+                            backgroundColor: colors[1],
+                            borderColor: borderColors[1],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            })
+            .catch((error) => console.error('Error fetching JSON:', error));
+    });
+    </script>
+    
+        </div>
+
+        <div id="Segment" class="tabcontent">
+            <section class="wrapper-visualization">
+            <div class="card">
+                <h2 class="title-visualization">Sales by Segment</h2>
+                    <canvas id="salesBySegment2"></canvas>
+            </div>
+
+            <div class="card">
+                <h2 class="title-visualization">Profit by Segment</h2>
+                    <canvas id="profitBySegment"></canvas>
+            </div>
+            </section>
+
+            <script>
+
+                // Sales by Segment
+
+                document.addEventListener('DOMContentLoaded', function () {
+    const ctx = document.getElementById('salesBySegment2').getContext('2d');
+
+    fetch('/json/dataset.json')
+        .then((response) => response.json())
+        .then((data) => {
+            const customers = data.data; // Asumsikan data berada di dalam objek "data"
+            
+            // Filter dan kelompokkan data berdasarkan Segment
+            const salesBySegment = customers.reduce((acc, item) => {
+                if (acc[item.Segment]) {
+                    acc[item.Segment] += item.Sales;
+                } else {
+                    acc[item.Segment] = item.Sales;
+                }
+                return acc;
+            }, {});
+
+            // Membuat data untuk chart
+            const segments = Object.keys(salesBySegment);
+            const sales = Object.values(salesBySegment);
+
+            // Warna untuk setiap segmen
+            const colors = {
+                'Consumer': 'rgba(200, 10, 192, 0.2)',
+                'Corporate': 'rgba(255, 99, 132, 0.2)',
+                'Home Office': 'rgba(54, 162, 235, 0.2)'
+            };
+
+            const borderColors = {
+                'Consumer': 'rgba(200, 10, 192, 1)',
+                'Corporate': 'rgba(255, 99, 132, 1)',
+                'Home Office': 'rgba(54, 162, 235, 1)'
+            };
+
+            const backgroundColors = segments.map(segment => colors[segment]);
+            const borderColorArray = segments.map(segment => borderColors[segment]);
+
+            new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: segments,
+                    datasets: [{
+                        label: 'Sales by Segment',
+                        data: sales,
+                        backgroundColor: backgroundColors,
+                        borderColor: borderColorArray,
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                        title: {
+                            display: true,
+                            text: 'Sales by Segment'
+                        },
+                        datalabels: {
+                            formatter: (value, ctx) => {
+                                const total = ctx.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+                                const percentage = (value / total * 100).toFixed(2) + '%';
+                                return percentage;
+                            },
+                            color: 'black',
+                        }
+                    }
+                },
+                plugins: [ChartDataLabels]
+            });
+        })
+        .catch((error) => console.error('Error fetching JSON:', error));
+});
+
+
+
+
+// Profit by Segement
+
+document.addEventListener('DOMContentLoaded', function () {
+    const ctx = document.getElementById('profitBySegment').getContext('2d');
+    
+    fetch('/json/dataset.json')
+        .then((response) => response.json())
+        .then((data) => {
+            const customers = data.data; // Asumsikan data berada di dalam objek "data"
+
+            // Filter dan kelompokkan data berdasarkan Segment
+            const profitBySegment = customers.reduce((acc, item) => {
+                if (acc[item.Segment]) {
+                    acc[item.Segment] += item.Profit;
+                } else {
+                    acc[item.Segment] = item.Profit;
+                }
+                return acc;
+            }, {});
+
+            // Membuat data untuk chart
+            const segments = Object.keys(profitBySegment);
+            const profits = Object.values(profitBySegment);
+
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: segments,
+                    datasets: [{
+                        label: 'Profit by Segment',
+                        data: profits,
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        })
+        .catch((error) => console.error('Error fetching JSON:', error));
+});
+            </script>
+
+
+<section class="wrapper-visualization">
+    <div class="card">
+        <h2 class="title-visualization">Sales per Quantity by Segment</h2>
+            <canvas id="salesPerQuantityBySegment"></canvas>
+    </div>
+
+    <div class="card">
+        <h2 class="title-visualization">Profit per Quantity by Segment</h2>
+            <canvas id="ProfitPerQuantityBySegment"></canvas>
+    </div>
+</section>
+
+<script>
+
+    // Sales per Quantity by Segment
+
+document.addEventListener('DOMContentLoaded', function () {
+    const ctx = document.getElementById('salesPerQuantityBySegment').getContext('2d');
+    fetch('/json/dataset.json')
+        .then((response) => response.json())
+        .then((data) => {
+            const customers = data.data; // Ambil array data dari objek
+
+            // Kelompokkan data berdasarkan segmen
+            const salesBySegment = customers.reduce((acc, item) => {
+                if (!acc[item.Segment]) {
+                    acc[item.Segment] = 0;
+                }
+                acc[item.Segment] += item.Quantity * item.Sales; // Hitung penjualan per kuantitas
+                return acc;
+            }, {});
+
+            // Persiapkan data untuk chart
+            const segments = Object.keys(salesBySegment);
+            const sales = Object.values(salesBySegment);
+
+            // Warna untuk setiap segmen
+            const colors = {
+                'Consumer': 'rgba(255, 99, 132, 0.2)',
+                'Corporate': 'rgba(54, 162, 235, 0.2)',
+                'Home Office': 'rgba(75, 192, 192, 0.2)'
+            };
+
+            const borderColors = {
+                'Consumer': 'rgba(255, 99, 132, 1)',
+                'Corporate': 'rgba(54, 162, 235, 1)',
+                'Home Office': 'rgba(75, 192, 192, 1)'
+            };
+
+            const backgroundColors = segments.map(segment => colors[segment]);
+            const borderColorArray = segments.map(segment => borderColors[segment]);
+
+            // Buat grafik
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: segments,
+                    datasets: [{
+                        label: 'Sales by Segment',
+                        data: sales,
+                        backgroundColor: backgroundColors,
+                        borderColor: borderColorArray,
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        })
+        .catch((error) => console.error('Error fetching JSON:', error));
+});
+
+
+// Profit per Quantity by Segment 
+
+document.addEventListener('DOMContentLoaded', function () {
+    const ctx = document.getElementById('ProfitPerQuantityBySegment').getContext('2d');
+    fetch('/json/dataset.json')
+        .then((response) => response.json())
+        .then((data) => {
+            const orders = data.data; // Assuming the data array is named "data"
+
+            // Group data by segment and calculate profit per quantity
+            const profitBySegment = orders.reduce((acc, order) => {
+                if (!acc[order.Segment]) {
+                    acc[order.Segment] = 0;
+                }
+                acc[order.Segment] += order.Profit * order.Quantity; // Calculate profit per quantity
+                return acc;
+            }, {});
+
+            // Prepare data for the chart
+            const segments = Object.keys(profitBySegment);
+            const profits = Object.values(profitBySegment);
+
+            // Define colors for each segment
+            const colors = {
+                'Consumer': 'rgba(255, 99, 132, 0.2)',
+                'Corporate': 'rgba(54, 162, 235, 0.2)',
+                'Home Office': 'rgba(75, 192, 192, 0.2)'
+            };
+
+            // Define border colors for each segment
+            const borderColors = {
+                'Consumer': 'rgba(255, 99, 132, 1)',
+                'Corporate': 'rgba(54, 162, 235, 1)',
+                'Home Office': 'rgba(75, 192, 192, 1)'
+            };
+
+            // Map segment colors and border colors
+            const backgroundColors = segments.map(segment => colors[segment]);
+            const borderColorArray = segments.map(segment => borderColors[segment]);
+
+            // Create the chart
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: segments,
+                    datasets: [{
+                        label: 'Profit per Quantity by Segment',
+                        data: profits,
+                        backgroundColor: backgroundColors,
+                        borderColor: borderColorArray,
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        })
+        .catch((error) => console.error('Error fetching JSON:', error));
+});
+</script>
+
+
+<section class="wrapper-visualization">
+    <div class="card">
+        <h2 class="title-visualization">Sales by Segment Year of Year</h2>
+            <canvas id="salesBySegmentYoY"></canvas>
+    </div>
+
+    <div class="card">
+        <h2 class="title-visualization">Ship Mode per Segment</h2>
+            <canvas id="shipModePerSegment"></canvas>
+    </div>
+</section>
+
+<script>
+
+    // Sales By Segment Year of Year
+
+document.addEventListener('DOMContentLoaded', function () {
+    const ctx = document.getElementById('salesBySegmentYoY').getContext('2d');
+
+    fetch('/json/dataset.json')
+        .then((response) => response.json())
+        .then((data) => {
+            const orders = data.data; // Assuming the data array is named "data"
+
+            // Group data by segment and year
+            const salesBySegmentAndYear = orders.reduce((acc, order) => {
+                const year = new Date(order['Order Date']).getFullYear();
+                const key = `${order.Segment}-${year}`;
+                if (!acc[key]) {
+                    acc[key] = 0;
+                }
+                acc[key] += order.Sales; // Accumulate sales for each segment and year
+                return acc;
+            }, {});
+
+            // Extract unique segments and years
+            const segments = [...new Set(orders.map(order => order.Segment))];
+            const years = [...new Set(orders.map(order => new Date(order['Order Date']).getFullYear()))].sort();
+
+            // Define colors for each segment
+            const colors = {
+                'Consumer': 'rgba(255, 99, 132, 0.2)',
+                'Corporate': 'rgba(54, 162, 235, 0.2)',
+                'Home Office': 'rgba(75, 192, 192, 0.2)'
+            };
+
+            const borderColors = {
+                'Consumer': 'rgba(255, 99, 132, 1)',
+                'Corporate': 'rgba(54, 162, 235, 1)',
+                'Home Office': 'rgba(75, 192, 192, 1)'
+            };
+
+            // Prepare datasets for each segment
+            const datasets = segments.map(segment => {
+                return {
+                    label: segment,
+                    data: years.map(year => {
+                        const key = `${segment}-${year}`;
+                        return salesBySegmentAndYear[key] || 0;
+                    }),
+                    backgroundColor: colors[segment],
+                    borderColor: borderColors[segment],
+                    borderWidth: 1
+                };
+            });
+
+            // Create the chart
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: years,
+                    datasets: datasets
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        },
+                        x: {
+                            type: 'category',
+                            labels: years
+                        }
+                    }
+                }
+            });
+        })
+        .catch((error) => console.error('Error fetching JSON:', error));
+});
+
+
+// Ship Mode per Segment
+
+document.addEventListener('DOMContentLoaded', function () {
+            const ctx = document.getElementById('shipModePerSegment').getContext('2d');
+            fetch('/json/dataset.json')
+            .then((response) => response.json())
+            .then((data) => {
+                const customers = data.data; // Asumsikan data berada di dalam objek "data"
+
+                // Filter dan kelompokkan data berdasarkan Ship Mode dan Segment
+                const shipModes = ['Standard Class', 'Second Class', 'First Class', 'Same Day'];
+                const segments = ['Consumer', 'Corporate', 'Home Office'];
+                const segmentColors = {
+                    'Consumer': 'rgba(75, 192, 192, 0.2)',
+                    'Corporate': 'rgba(255, 99, 132, 0.2)',
+                    'Home Office': 'rgba(54, 162, 235, 0.2)'
+                };
+                const segmentBorderColors = {
+                    'Consumer': 'rgba(75, 192, 192, 1)',
+                    'Corporate': 'rgba(255, 99, 132, 1)',
+                    'Home Office': 'rgba(54, 162, 235, 1)'
+                };
+
+                const shipModeSegmentData = shipModes.reduce((acc, shipMode) => {
+                    acc[shipMode] = segments.reduce((segmentAcc, segment) => {
+                        segmentAcc[segment] = 0;
+                        return segmentAcc;
+                    }, {});
+                    return acc;
+                }, {});
+
+                customers.forEach(item => {
+                    const shipMode = item['Ship Mode'];
+                    const segment = item['Segment'];
+                    if (shipModeSegmentData[shipMode] && shipModeSegmentData[shipMode][segment] !== undefined) {
+                        shipModeSegmentData[shipMode][segment] += 1;
+                    }
+                });
+
+                const datasets = segments.map(segment => {
+                    return {
+                        label: segment,
+                        data: shipModes.map(shipMode => shipModeSegmentData[shipMode][segment]),
+                        backgroundColor: segmentColors[segment],
+                        borderColor: segmentBorderColors[segment],
+                        borderWidth: 1
+                    };
+                });
+
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: shipModes,
+                        datasets: datasets
+                    },
+                    options: {
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        },
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                            },
+                            title: {
+                                display: true,
+                                text: 'Usage of Ship Mode by Segment'
+                            }
+                        }
+                    }
+                });
+            })
+            .catch((error) => console.error('Error fetching JSON:', error));
+        });
+</script>
+
+<section class="wrapper-visualization">
+    <div class="card">
+        <h2 class="title-visualization">Region per Segment</h2>
+            <canvas id="regionPerSegment"></canvas>
+    </div>
+</section>
+
+<script>
+    // Region per Segment
+
+document.addEventListener('DOMContentLoaded', function () {
+            const ctx = document.getElementById('regionPerSegment').getContext('2d');
+            fetch('/json/dataset.json')
+                .then((response) => response.json())
+                .then((data) => {
+                    const customers = data.data; // Asumsikan data berada di dalam objek "data"
+
+                    // Filter dan kelompokkan data berdasarkan Region dan Segment
+                    const regions = ['West', 'East', 'Central', 'South'];
+                    const segments = ['Consumer', 'Corporate', 'Home Office'];
+                    const segmentColors = {
+                        'Consumer': 'rgba(75, 192, 192, 0.2)',
+                        'Corporate': 'rgba(255, 99, 132, 0.2)',
+                        'Home Office': 'rgba(54, 162, 235, 0.2)'
+                    };
+                    const segmentBorderColors = {
+                        'Consumer': 'rgba(75, 192, 192, 1)',
+                        'Corporate': 'rgba(255, 99, 132, 1)',
+                        'Home Office': 'rgba(54, 162, 235, 1)'
+                    };
+
+                    const regionSegmentData = regions.reduce((acc, region) => {
+                        acc[region] = segments.reduce((segmentAcc, segment) => {
+                            segmentAcc[segment] = 0;
+                            return segmentAcc;
+                        }, {});
+                        return acc;
+                    }, {});
+
+                    customers.forEach(item => {
+                        const region = item['Region'];
+                        const segment = item['Segment'];
+                        if (regionSegmentData[region] && regionSegmentData[region][segment] !== undefined) {
+                            regionSegmentData[region][segment] += 1;
+                        }
+                    });
+
+                    const datasets = segments.map(segment => {
+                        return {
+                            label: segment,
+                            data: regions.map(region => regionSegmentData[region][segment]),
+                            backgroundColor: segmentColors[segment],
+                            borderColor: segmentBorderColors[segment],
+                            borderWidth: 1
+                        };
+                    });
+
+                    new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: regions,
+                            datasets: datasets
+                        },
+                        options: {
+                            scales: {
+                                y: {
+                                    beginAtZero: true
+                                }
+                            },
+                            responsive: true,
+                            plugins: {
+                                legend: {
+                                    position: 'top',
+                                },
+                                title: {
+                                    display: true,
+                                    text: 'Usage of Regions by Segment'
+                                }
+                            }
+                        }
+                    });
+                })
+                .catch((error) => console.error('Error fetching JSON:', error));
+        });
+
+</script>
+        </div>
+
+        <div id="Region" class="tabcontent">
+            <section class="wrapper-visualization">
+                <div class="card">
+                    <h2 class="title-visualization">Region</h2>
+                        <canvas id="region"></canvas>
+                </div>
+    
+                <div class="card">
+                    <h2 class="title-visualization">Sales by Category</h2>
+                        <canvas id="salesByCategory3"></canvas>
+                </div>
+            </section>
+            <script>
+
+                // Region
+
+document.addEventListener('DOMContentLoaded', function () {
+            const ctx = document.getElementById('region').getContext('2d');
+            fetch('/json/dataset.json')
+                .then((response) => response.json())
+                .then((data) => {
+                    const customers = data.data; // Asumsikan data berada di dalam objek "data"
+
+                    // Filter dan kelompokkan data berdasarkan Region
+                    const regions = ['West', 'East', 'Central', 'South'];
+                    const metrics = ['Sales', 'Profit'];
+
+                    const regionData = regions.reduce((acc, region) => {
+                        acc[region] = { Sales: 0, Profit: 0 };
+                        return acc;
+                    }, {});
+
+                    customers.forEach(item => {
+                        const region = item['Region'];
+                        if (regionData[region]) {
+                            regionData[region]['Sales'] += item['Sales'];
+                            regionData[region]['Profit'] += item['Profit'];
+                        }
+                    });
+
+                    const salesData = regions.map(region => regionData[region]['Sales']);
+                    const profitData = regions.map(region => regionData[region]['Profit']);
+
+                    const datasets = [
+                        {
+                            label: 'Sales',
+                            data: salesData,
+                            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                            borderColor: 'rgba(75, 192, 192, 1)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Profit',
+                            data: profitData,
+                            backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                            borderColor: 'rgba(255, 99, 132, 1)',
+                            borderWidth: 1
+                        }
+                    ];
+
+                    new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: regions,
+                            datasets: datasets
+                        },
+                        options: {
+                            scales: {
+                                y: {
+                                    beginAtZero: true
+                                },
+                                x: {
+                                    stacked: true
+                                },
+                                y: {
+                                    stacked: true
+                                }
+                            },
+                            responsive: true,
+                            plugins: {
+                                legend: {
+                                    position: 'top',
+                                },
+                                title: {
+                                    display: true,
+                                    text: 'Sales and Profit by Region'
+                                }
+                            }
+                        }
+                    });
+                })
+                .catch((error) => console.error('Error fetching JSON:', error));
+        });
+
+
+// Sales by Category
+
+document.addEventListener('DOMContentLoaded', function () {
+            const ctx = document.getElementById('salesByCategory3').getContext('2d');
+            fetch('/json/dataset.json')
+                .then(response => response.json())
+                .then(data => {
+                    const customers = data.data; // Asumsikan data berada di dalam objek "data"
+
+                    // Filter dan kelompokkan data berdasarkan Region dan Category
+                    const regions = ['West', 'East', 'Central', 'South'];
+                    const categories = ['Technology', 'Furniture', 'Office Supplies'];
+
+                    const regionCategoryData = regions.reduce((acc, region) => {
+                        acc[region] = categories.reduce((catAcc, category) => {
+                            catAcc[category] = 0;
+                            return catAcc;
+                        }, {});
+                        return acc;
+                    }, {});
+
+                    customers.forEach(item => {
+                        const region = item['Region'];
+                        const category = item['Category'];
+                        if (regionCategoryData[region] && regionCategoryData[region][category] !== undefined) {
+                            regionCategoryData[region][category] += item['Sales'];
+                        }
+                    });
+
+                    const technologyData = regions.map(region => regionCategoryData[region]['Technology']);
+                    const furnitureData = regions.map(region => regionCategoryData[region]['Furniture']);
+                    const officeSuppliesData = regions.map(region => regionCategoryData[region]['Office Supplies']);
+
+                    const datasets = [
+                        {
+                            label: 'Technology',
+                            data: technologyData,
+                            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                            borderColor: 'rgba(75, 192, 192, 1)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Furniture',
+                            data: furnitureData,
+                            backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                            borderColor: 'rgba(255, 99, 132, 1)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Office Supplies',
+                            data: officeSuppliesData,
+                            backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                            borderColor: 'rgba(54, 162, 235, 1)',
+                            borderWidth: 1
+                        }
+                    ];
+
+                    new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: regions,
+                            datasets: datasets
+                        },
+                        options: {
+                            scales: {
+                                y: {
+                                    beginAtZero: true
+                                },
+                                x: {
+                                    stacked: false
+                                }
+                            },
+                            responsive: true,
+                            plugins: {
+                                legend: {
+                                    position: 'top',
+                                },
+                                title: {
+                                    display: true,
+                                    text: 'Sales by Category and Region'
+                                }
+                            }
+                        }
+                    });
+                })
+                .catch(error => console.error('Error fetching JSON:', error));
+        });
+            </script>
+
+<section class="wrapper-visualization">
+    <div class="card">
+        <h2 class="title-visualization">Ship Mode</h2>
+            <canvas id="shipMode"></canvas>
+    </div>
+
+    <div class="card">
+        <h2 class="title-visualization">Sales Year of Year</h2>
+            <canvas id="salesYoY"></canvas>
+    </div>
+</section>
+
+<script>
+
+    // Ship Mode
+
+document.addEventListener('DOMContentLoaded', function () {
+            const ctx = document.getElementById('shipMode').getContext('2d');
+            fetch('/json/dataset.json')
+                .then((response) => response.json())
+                .then((data) => {
+                    const customers = data.data; // Asumsikan data berada di dalam objek "data"
+
+                    // Filter dan kelompokkan data berdasarkan Ship Mode dan Region
+                    const shipModes = ['Standard Class', 'Second Class', 'First Class', 'Same Day'];
+                    const regions = ['West', 'East', 'Central', 'South'];
+
+                    const shipModeRegionData = shipModes.reduce((acc, mode) => {
+                        acc[mode] = regions.reduce((regionAcc, region) => {
+                            regionAcc[region] = 0;
+                            return regionAcc;
+                        }, {});
+                        return acc;
+                    }, {});
+
+                    customers.forEach(item => {
+                        const shipMode = item['Ship Mode'];
+                        const region = item['Region'];
+                        if (shipModeRegionData[shipMode] && shipModeRegionData[shipMode][region] !== undefined) {
+                            shipModeRegionData[shipMode][region] += 1;
+                        }
+                    });
+
+                    const datasets = regions.map((region, index) => {
+                        const colors = [
+                            'rgba(75, 192, 192, 0.2)',
+                            'rgba(255, 99, 132, 0.2)',
+                            'rgba(54, 162, 235, 0.2)',
+                            'rgba(255, 206, 86, 0.2)'
+                        ];
+                        const borderColors = [
+                            'rgba(75, 192, 192, 1)',
+                            'rgba(255, 99, 132, 1)',
+                            'rgba(54, 162, 235, 1)',
+                            'rgba(255, 206, 86, 1)'
+                        ];
+                        return {
+                            label: region,
+                            data: shipModes.map(mode => shipModeRegionData[mode][region]),
+                            backgroundColor: colors[index],
+                            borderColor: borderColors[index],
+                            borderWidth: 1
+                        };
+                    });
+
+                    new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: shipModes,
+                            datasets: datasets
+                        },
+                        options: {
+                            scales: {
+                                y: {
+                                    beginAtZero: true
+                                }
+                            },
+                            responsive: true,
+                            plugins: {
+                                legend: {
+                                    position: 'top',
+                                },
+                                title: {
+                                    display: true,
+                                    text: 'Ship Mode by Region'
+                                }
+                            }
+                        }
+                    });
+                })
+                .catch((error) => console.error('Error fetching JSON:', error));
+        });
+
+
+
+
+// Sales Year of Year
+
+document.addEventListener('DOMContentLoaded', function () {
+            const ctx = document.getElementById('salesYoY').getContext('2d');
+            fetch('/json/dataset.json')
+                .then((response) => response.json())
+                .then((data) => {
+                    const customers = data.data; // Asumsikan data berada di dalam objek "data"
+
+                    // Filter dan kelompokkan data berdasarkan Year dan Region
+                    const regions = ['West', 'East', 'Central', 'South'];
+                    const years = [2014, 2015, 2016, 2017];
+
+                    const salesDataByRegion = regions.reduce((acc, region) => {
+                        acc[region] = years.reduce((yearAcc, year) => {
+                            yearAcc[year] = 0;
+                            return yearAcc;
+                        }, {});
+                        return acc;
+                    }, {});
+
+                    customers.forEach(item => {
+                        const region = item['Region'];
+                        const year = new Date(item['Order Date']).getFullYear();
+                        if (salesDataByRegion[region] && salesDataByRegion[region][year] !== undefined) {
+                            salesDataByRegion[region][year] += item['Sales'];
+                        }
+                    });
+
+                    const datasets = regions.map((region, index) => {
+                        const colors = [
+                            'rgba(75, 192, 192, 1)',
+                            'rgba(255, 99, 132, 1)',
+                            'rgba(54, 162, 235, 1)',
+                            'rgba(255, 206, 86, 1)'
+                        ];
+                        return {
+                            label: region,
+                            data: years.map(year => salesDataByRegion[region][year]),
+                            borderColor: colors[index],
+                            backgroundColor: colors[index],
+                            fill: false,
+                            tension: 0.1
+                        };
+                    });
+
+                    new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: years,
+                            datasets: datasets
+                        },
+                        options: {
+                            scales: {
+                                y: {
+                                    beginAtZero: true
+                                }
+                            },
+                            responsive: true,
+                            plugins: {
+                                legend: {
+                                    position: 'top',
+                                },
+                                title: {
+                                    display: true,
+                                    text: 'Sales by Region and Year'
+                                }
+                            }
+                        }
+                    });
+                })
+                .catch((error) => console.error('Error fetching JSON:', error));
+        });
+</script>
+        </div>
+
+        <div id="Product" class="tabcontent">
+            <section class="wrapper-visualization">
+                <div class="card">
+                    <h2 class="title-visualization">Number of Product by Year</h2>
+                        <canvas id="numberOfProductByYear"></canvas>
+                </div>
+    
+                <div class="card">
+                    <h2 class="title-visualization">Sales of Product by Year</h2>
+                        <canvas id="salesOfProductByYear"></canvas>
+                </div>
+            </section>
+
+            <script>
+
+document.addEventListener('DOMContentLoaded', function () {
+    const ctx = document.getElementById('numberOfProductByYear').getContext('2d');
+    
+    fetch('/json/dataset.json')
+        .then((response) => response.json())
+        .then((data) => {
+            const filteredData = data.data.filter(item => item.Country === 'United States');
+
+            const productCountByYear = {};
+            ['2014', '2015', '2016', '2017'].forEach(year => {
+                productCountByYear[year] = 0;
+            });
+
+            filteredData.forEach(item => {
+                const orderYear = new Date(item['Order Date']).getFullYear().toString();
+                if (productCountByYear.hasOwnProperty(orderYear)) {
+                    productCountByYear[orderYear] += item.Quantity;
+                }
+            });
+
+            const years = Object.keys(productCountByYear);
+            const productCounts = Object.values(productCountByYear);
+
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: years,
+                    datasets: [{
+                        label: 'Number of Products Sold per Year',
+                        data: productCounts,
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        borderWidth: 1,
+                        fill: false
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        });
+});
+
+
+document.addEventListener('DOMContentLoaded', function () {
+    const ctx = document.getElementById('salesOfProductByYear').getContext('2d');
+    
+    fetch('/json/dataset.json')
+        .then((response) => response.json())
+        .then((data) => {
+            const filteredData = data.data.filter(item => item.Country === 'United States');
+
+            const salesByYear = {
+                '2014': 0,
+                '2015': 0,
+                '2016': 0,
+                '2017': 0
+            };
+
+            filteredData.forEach(item => {
+                const orderYear = new Date(item['Order Date']).getFullYear().toString();
+                if (salesByYear.hasOwnProperty(orderYear)) {
+                    salesByYear[orderYear] += item.Sales;
+                }
+            });
+
+            const years = Object.keys(salesByYear);
+            const sales = Object.values(salesByYear);
+
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: years,
+                    datasets: [{
+                        label: 'Sales by Year',
+                        data: sales,
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        borderWidth: 1,
+                        fill: false
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        });
+});
+
+
+            </script>
+
+
+<section class="wrapper-visualization">
+    <div class="card">
+        <h2 class="title-visualization">Profit of Product by Year</h2>
+            <canvas id="profitOfProductByYear"></canvas>
+    </div>
+
+    <div class="card">
+        <h2 class="title-visualization">Number of Product by Category</h2>
+            <canvas id="numberOfProductByCategory"></canvas>
+    </div>
+</section>
+
+<script>
+
+// Profit of Product by Year
+
+document.addEventListener('DOMContentLoaded', function () {
+    const ctx = document.getElementById('profitOfProductByYear').getContext('2d');
+    
+    fetch('/json/dataset.json')
+        .then((response) => response.json())
+        .then((data) => {
+            const filteredData = data.data.filter(item => item.Country === 'United States');
+
+            const profitByYear = {
+                '2014': 0,
+                '2015': 0,
+                '2016': 0,
+                '2017': 0
+            };
+
+            filteredData.forEach(item => {
+                const orderYear = new Date(item['Order Date']).getFullYear().toString();
+                if (profitByYear.hasOwnProperty(orderYear)) {
+                    profitByYear[orderYear] += item.Profit;
+                }
+            });
+
+            const years = Object.keys(profitByYear);
+            const profits = Object.values(profitByYear);
+
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: years,
+                    datasets: [{
+                        label: 'Profit by Year',
+                        data: profits,
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        borderWidth: 1,
+                        fill: false
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        });
+});
+
+
+// Number of Product by Category
+
+document.addEventListener('DOMContentLoaded', function () {
+    const ctx = document.getElementById('numberOfProductByCategory').getContext('2d');
+    
+    fetch('/json/dataset.json')
+        .then((response) => response.json())
+        .then((data) => {
+            const products = data.data;
+
+            const categoryCount = {
+                'Office Supplies': 0,
+                'Technology': 0,
+                'Furniture': 0
+            };
+
+            products.forEach(item => {
+                const category = item.Category;
+                if (categoryCount.hasOwnProperty(category)) {
+                    categoryCount[category] += item.Quantity;
+                }
+            });
+
+            const categories = Object.keys(categoryCount);
+            const quantities = Object.values(categoryCount);
+
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: categories,
+                    datasets: [{
+                        label: 'Product Name',
+                        data: quantities,
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        });
+});
+
+
+
+</script>
+
+<section class="wrapper-visualization">
+    <div class="card">
+        <h2 class="title-visualization">Profit & Sales by Sub Category</h2>
+            <canvas id="profitSalesBySubCategory"></canvas>
+    </div>
+
+    <div class="card">
+        <h2 class="title-visualization">Quantity by Sub Category</h2>
+            <canvas id="quantityBySubCategory"></canvas>
+    </div>
+</section>
+
+<script>
+
+// Profit & Sales by Sub Category
+
+document.addEventListener('DOMContentLoaded', function () {
+    const ctx = document.getElementById('profitSalesBySubCategory').getContext('2d');
+    
+    fetch('/json/dataset.json')
+        .then((response) => response.json())
+        .then((data) => {
+            const dataset = data.data;
+            
+            // Extracting unique sub-categories
+            const subCategories = [...new Set(dataset.map(item => item['Sub-Category']))];
+
+            // Initialize arrays to store profit and sales data for each sub-category
+            const profitData = [];
+            const salesData = [];
+
+            // Calculate total profit and sales for each sub-category
+            subCategories.forEach(subCategory => {
+                const profit = dataset.filter(item => item['Sub-Category'] === subCategory)
+                                      .reduce((acc, curr) => acc + curr['Profit'], 0);
+                const sales = dataset.filter(item => item['Sub-Category'] === subCategory)
+                                     .reduce((acc, curr) => acc + curr['Sales'], 0);
+
+                profitData.push(profit);
+                salesData.push(sales);
+            });
+
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: subCategories,
+                    datasets: [
+                        {
+                            label: 'Profit',
+                            data: profitData,
+                            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                            borderColor: 'rgba(75, 192, 192, 1)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Sales',
+                            data: salesData,
+                            backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                            borderColor: 'rgba(255, 99, 132, 1)',
+                            borderWidth: 1
+                        }
+                    ]
+                },
+                options: {
+                    scales: {
+                        x: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        });
+});
+
+
+// Quantity by Sub Category
+
+document.addEventListener('DOMContentLoaded', function () {
+    const ctx = document.getElementById('quantityBySubCategory').getContext('2d');
+
+    fetch('/json/dataset.json')
+        .then((response) => response.json())
+        .then((data) => {
+            const dataset = data.data;
+            
+            // Extracting unique sub-categories
+            const subCategories = [...new Set(dataset.map(item => item['Sub-Category']))];
+
+            // Initialize array to store quantity data for each sub-category
+            const quantityData = [];
+
+            // Calculate total quantity for each sub-category
+            subCategories.forEach(subCategory => {
+                const quantity = dataset.filter(item => item['Sub-Category'] === subCategory)
+                                        .reduce((acc, curr) => acc + curr['Quantity'], 0);
+                quantityData.push({ subCategory, quantity }); // Store sub-category and quantity as an object
+            });
+
+            // Sort sub-categories based on quantity in descending order
+            quantityData.sort((a, b) => b.quantity - a.quantity);
+
+            // Extract sorted sub-categories and quantities
+            const sortedSubCategories = quantityData.map(item => item.subCategory);
+            const sortedQuantities = quantityData.map(item => item.quantity);
+
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: sortedSubCategories,
+                    datasets: [{
+                        label: 'Quantity',
+                        data: sortedQuantities,
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        });
+});
+</script>
+
+<section class="wrapper-visualization">
+    <div class="card">
+        <h2 class="title-visualization">Number of Product by Ship Mode</h2>
+            <canvas id="numberOfProductByShipMode"></canvas>
+    </div>
+
+    <div class="card">
+        <h2 class="title-visualization">Top 5 Products Purchased</h2>
+            <canvas id="top5ProductsPurchased"></canvas>
+    </div>
+</section>
+
+        <script>
+            
+            // Number of Product by Ship Mode
+
+            document.addEventListener('DOMContentLoaded', function () {
+    const ctx = document.getElementById('numberOfProductByShipMode').getContext('2d');
+
+    fetch('/json/dataset.json')
+        .then((response) => response.json())
+        .then((data) => {
+            const dataset = data.data;
+
+            // Filter dataset to get unique ship modes
+            const shipModes = [...new Set(dataset.map(item => item['Ship Mode']))];
+
+            // Initialize object to store count of products for each ship mode
+            const productCountByShipMode = {};
+
+            // Count number of products for each ship mode
+            shipModes.forEach(mode => {
+                const products = dataset.filter(item => item['Ship Mode'] === mode);
+                productCountByShipMode[mode] = products.length;
+            });
+
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(productCountByShipMode),
+                    datasets: [{
+                        label: 'Number of Products by Ship Mode',
+                        data: Object.values(productCountByShipMode),
+                        backgroundColor: [
+                            'rgba(255, 99, 132, 0.2)',
+                            'rgba(54, 162, 235, 0.2)',
+                            'rgba(255, 206, 86, 0.2)',
+                            'rgba(75, 192, 192, 0.2)'
+                        ],
+                        borderColor: [
+                            'rgba(255, 99, 132, 1)',
+                            'rgba(54, 162, 235, 1)',
+                            'rgba(255, 206, 86, 1)',
+                            'rgba(75, 192, 192, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                        title: {
+                            display: true,
+                            text: 'Number of Products by Ship Mode'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    label += context.parsed + ' (' + ((context.parsed / context.dataset.data.reduce((a, b) => a + b, 0)) * 100).toFixed(2) + '%)';
+                                    return label;
+                                }
+                            }
+                        },
+                        datalabels: {
+                            formatter: (value, ctx) => {
+                                const total = ctx.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+                                const percentage = (value / total * 100).toFixed(2) + '%';
+                                return percentage;
+                            },
+                            color: 'black',
+                        }
+                    }
+                },
+                plugins: [ChartDataLabels]
+            });
+        })
+        .catch((error) => console.error('Error fetching JSON:', error));
+});
+
+
+
+// Top 5 Products Purchased
+
+document.addEventListener('DOMContentLoaded', function () {
+    const ctx = document.getElementById('top5ProductsPurchased').getContext('2d');
+    fetch('/json/dataset.json')
+        .then((response) => response.json())
+        .then((data) => {
+            const dataset = data.data;
+
+            // Create a map to store the total quantity of each product
+            const productQuantities = {};
+
+            dataset.forEach(item => {
+                const productName = item['Product Name'];
+                const quantity = item['Quantity'];
+                if (productQuantities[productName]) {
+                    productQuantities[productName] += quantity;
+                } else {
+                    productQuantities[productName] = quantity;
+                }
+            });
+
+            // Convert the productQuantities object to an array of [productName, quantity] pairs
+            const productQuantitiesArray = Object.entries(productQuantities);
+
+            // Sort the array by quantity in descending order and select the top 5 products
+            const top5Products = productQuantitiesArray.sort((a, b) => b[1] - a[1]).slice(0, 5);
+
+            // Separate the top 5 products into labels and data arrays
+            const labels = top5Products.map(item => item[0]);
+            const dataValues = top5Products.map(item => item[1]);
+
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Top 5 Products Purchased',
+                        data: dataValues,
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        });
+});
+
+        </script>
+        </div>
+
+        <script>
+        function openSubMenu(evt, subMenuName) {
+        var i, tabcontent, tablinks;
+        tabcontent = document.getElementsByClassName("tabcontent");
+        for (i = 0; i < tabcontent.length; i++) {
+            tabcontent[i].style.display = "none";
+        }
+        tablinks = document.getElementsByClassName("tablinks");
+          for (i = 0; i < tablinks.length; i++) {
+            tablinks[i].className = tablinks[i].className.replace(" active", "");
+          }
+          document.getElementById(subMenuName).style.display = "block";
+          evt.currentTarget.className += " active";
+        }
+
+        document.getElementById("defaultOpen").click();
+        
+        </script>
+
+    </main>
+
+    <footer>
+        <div class="footer">
+            <p>&copy; 2024 Super Store. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        feather.replace();
+    </script>
+  
+    <script src="../script/main.js"></script>
+
+</body>
+
+</html>

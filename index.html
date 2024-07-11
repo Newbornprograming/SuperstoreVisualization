@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Super Store</title>
+    <link href="styles/style.css" rel="stylesheet" type="text/css" />
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script src="https://unpkg.com/feather-icons"></script>
+  </head>
+
+  <body>
+    <nav class="navbar">
+      <a href="#" class="navbar-logo"
+        >Superstore Analytics
+        <img src="../image/logo.png" alt="" width="50" height="50"
+      /></a>
+
+      <div class="navbar-nav">
+        <a href="/index.html">Home</a>
+        <a href="./menu/dataset.html">Dataset</a>
+        <a href="./menu/visualization.html">Visualization</a>
+        <a href="./menu/about.html">About</a>
+      </div>
+
+      <div class="navbar-extra">
+        <a href="#" id="hamburger-menu"><i data-feather="menu"></i></a>
+      </div>
+    </nav>
+
+    <main>
+      <div
+        class="main"
+        data-aos="fade-down"
+        data-aos-easing="linear"
+        data-aos-duration="1000"
+        class="image-content"
+      >
+        <div class="main-content">
+          <h1>Super Store About</h1>
+          <br /><br />
+          <div class="text-content">
+            <p>
+              Super Store is a modern shopping center that offers an
+              extraordinary shopping experience for the entire community. With a
+              wide and varied product collection, ranging from daily necessities
+              to the latest electronic goods, Super Store is the main
+              destination for those looking for the best quality and prices.
+              Designed with a comfortable and family-friendly concept, every
+              corner of the shop provides convenience and comfort for visitors,
+              making shopping a fun activity.
+            </p>
+            <br />
+            <p>
+              Apart from providing a variety of high-quality products, Super
+              Store is also known for its superior customer service. Our staff
+              is well trained to help each customer find what they need, provide
+              informative suggestions, and ensure a satisfying shopping
+              experience. We understand that customer satisfaction is the key to
+              our success, so we always try to provide the best service and
+              treat every customer with special respect and attention.
+            </p>
+            <br />
+            <p>
+              Super Store is also committed to sustainability and social
+              responsibility. We work with local suppliers to provide
+              environmentally friendly products and support local communities.
+              With green initiative programs and charity activities, we strive
+              to have a positive impact on the environment and society. Super
+              Store is not only a place to shop, but also part of a community
+              that cares and contributes to mutual prosperity.
+            </p>
+          </div>
+          <button id="viewMoreBtn">View More</button>
+        </div>
+
+        <div class="main-image">
+          <section>
+            <div
+              data-aos="fade-down"
+              data-aos-easing="linear"
+              data-aos-duration="1500"
+              class="image-content"
+            >
+              <img
+                src="image/-previews.png"
+                alt="About Main Image"
+                class="resizable-image"
+              />
+            </div>
+          </section>
+        </div>
+      </div>
+    </main>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const viewMoreBtn = document.getElementById("viewMoreBtn");
+        const textContent = document.querySelector(".text-content");
+        const paragraphs = textContent.querySelectorAll("p");
+
+        let isExpanded = false;
+
+        function toggleView() {
+          if (isExpanded) {
+            for (let i = 2; i < paragraphs.length; i++) {
+              paragraphs[i].style.display = "none";
+            }
+            viewMoreBtn.textContent = "View More";
+          } else {
+            for (let i = 2; i < paragraphs.length; i++) {
+              paragraphs[i].style.display = "block";
+            }
+            viewMoreBtn.textContent = "View Less";
+          }
+          isExpanded = !isExpanded;
+        }
+
+        for (let i = 2; i < paragraphs.length; i++) {
+          paragraphs[i].style.display = "none";
+        }
+
+        viewMoreBtn.addEventListener("click", toggleView);
+      });
+    </script>
+
+    <div class="overview" data-aos="fade-left">
+      <h1>Overview</h1>
+      <img src="image/overview-2.png" alt="Logo" width="70" height="70" />
+      <div class="wrapper-overview">
+        <div class="card">
+          <h3 class="title-overview">Sales Total</h3>
+          <h4 class="overview-value">2,3M</h4>
+        </div>
+
+        <div class="card">
+          <h3 class="title-overview">Orders Total</h3>
+          <h4 class="overview-value">9.994</h4>
+        </div>
+
+        <div class="card">
+          <h3 class="title-overview">Profit Total</h3>
+          <h4 class="overview-value">286.4K</h4>
+        </div>
+
+        <div class="card">
+          <h3 class="title-overview">Quantity</h3>
+          <h4 class="overview-value">37.9K</h4>
+        </div>
+
+        <div class="card">
+          <h3 class="title-overview">Profit per Customer</h3>
+          <h4 class="overview-value">231.53</h4>
+        </div>
+      </div>
+    </div>
+
+    <div class="statistic" data-aos="fade-right">
+      <div class="statistic-title">
+        <h1>Statistic By-Profit</h1>
+      </div>
+
+      <canvas id="myChart" width="400" height="200"></canvas>
+
+      <section class="wrapper-statistic">
+        <a
+          href="javascript:void(0);"
+          class="statistic-card-link"
+          data-type="daily"
+          style="display: block; text-decoration: none"
+        >
+          <div class="statistic-card">
+            <h3 class="title-statistic-card">Daily</h3>
+          </div>
+        </a>
+
+        <a
+          href="javascript:void(0);"
+          class="statistic-card-link"
+          data-type="monthly"
+          style="display: block; text-decoration: none"
+        >
+          <div class="statistic-card">
+            <h3 class="title-statistic-card">Monthly</h3>
+          </div>
+        </a>
+
+        <a
+          href="javascript:void(0);"
+          class="statistic-card-link"
+          data-type="yearly"
+          style="display: block; text-decoration: none"
+        >
+          <div class="statistic-card">
+            <h3 class="title-statistic-card">Yearly</h3>
+          </div>
+        </a>
+      </section>
+    </div>
+
+    <footer>
+      <div class="footer">
+        <p>&copy; 2024 Super Store. All rights reserved.</p>
+      </div>
+    </footer>
+
+    <script>
+      AOS.init();
+      feather.replace();
+    </script>
+
+    <script src="./script/main.js"></script>
+    <script src="./script/index.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  </body>
+</html>
