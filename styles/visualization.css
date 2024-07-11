@@ -55,13 +55,25 @@ body {
   margin: 0 1rem;
 }
 
-.navbar .navbar-nav a:hover,
-.navbar .navbar-nav a.active {
+/* Styling untuk navbar link aktif */
+.navbar .navbar-nav a.active,
+.navbar .navbar-nav a:hover {
   color: rgb(225, 229, 0);
 }
 
-.navbar .navbar-nav a::after,
-.navbar .navbar-nav a.active::after {
+/* Menambahkan border bawah kuning untuk link aktif */
+.navbar .navbar-nav a.active::after,
+.navbar .navbar-nav a:hover::after {
+  content: "";
+  display: block;
+  padding-bottom: 0.5rem;
+  border-bottom: 0.2rem solid rgb(225, 229, 0); /* warna kuning */
+  transform: scaleX(1);
+  transition: 0.2s linear;
+}
+
+/* Menambahkan border bawah putih default untuk link non-aktif */
+.navbar .navbar-nav a::after {
   content: "";
   display: block;
   padding-bottom: 0.5rem;
@@ -70,9 +82,8 @@ body {
   transition: 0.2s linear;
 }
 
-.navbar .navbar-nav a:hover::after,
-.navbar .navbar-nav a.active::after {
-  transform: scaleX(0.5);
+.navbar .navbar-nav a:hover::after {
+  transform: scaleX(1);
 }
 
 .navbar .navbar-extra a {
