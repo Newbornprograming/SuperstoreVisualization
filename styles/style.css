@@ -56,11 +56,13 @@ body {
   padding: 8px 12px;
 }
 
-.navbar .navbar-nav a:hover {
+.navbar .navbar-nav a:hover,
+.navbar .navbar-nav a.active {
   color: rgb(225, 229, 0);
 }
 
-.navbar .navbar-nav a::after {
+.navbar .navbar-nav a::after,
+.navbar .navbar-nav a.active::after {
   content: "";
   display: block;
   padding-bottom: 0.5rem;
@@ -69,7 +71,8 @@ body {
   transition: 0.2s linear;
 }
 
-.navbar .navbar-nav a:hover::after {
+.navbar .navbar-nav a:hover::after,
+.navbar .navbar-nav a.active::after {
   transform: scaleX(0.5);
 }
 
