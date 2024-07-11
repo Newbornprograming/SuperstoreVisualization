@@ -55,12 +55,14 @@ body {
   margin: 0 1rem;
 }
 
-.navbar .navbar-nav a:hover {
+.navbar .navbar-nav a:hover,
+.navbar .navbar-nav a.active {
   color: rgb(225, 229, 0);
 }
 
-.navbar .navbar-nav a::after {
-  content: '';
+.navbar .navbar-nav a::after,
+.navbar .navbar-nav a.active::after {
+  content: "";
   display: block;
   padding-bottom: 0.5rem;
   border-bottom: 0.1rem solid white;
@@ -68,7 +70,8 @@ body {
   transition: 0.2s linear;
 }
 
-.navbar .navbar-nav a:hover::after {
+.navbar .navbar-nav a:hover::after,
+.navbar .navbar-nav a.active::after {
   transform: scaleX(0.5);
 }
 
