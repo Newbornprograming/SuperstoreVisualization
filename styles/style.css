@@ -54,6 +54,7 @@ body {
   display: inline-block;
   font-size: 18px;
   padding: 8px 12px;
+  font-weight: bold;
 }
 
 /* Styling untuk navbar link aktif */
